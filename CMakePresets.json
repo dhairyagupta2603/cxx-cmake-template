@@ -1,0 +1,242 @@
+{
+  "version": 6,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 26,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "base-config",
+      "hidden": true,
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build",
+      "installDir": "${sourceDir}/build/install",
+      "cacheVariables": {
+        "CMAKE_INSTALL_PREFIX": "${sourceDir}/build/install",
+        "CMAKE_CXX_STANDARD": "20",
+        "CMAKE_CXX_STANDARD_REQUIRED": "ON",
+        "CMAKE_CXX_EXTENSIONS": "OFF"
+      }
+    },
+    {
+      "name": "linux-config",
+      "hidden": true,
+      "inherits": "base-config",
+      "cacheVariables": {
+        "CMAKE_C_COMPILER": "/usr/bin/clang",
+        "CMAKE_CXX_COMPILER": "/usr/bin/clang++"
+      }
+    },
+    {
+      "name": "windows-config",
+      "hidden": true,
+      "inherits": "base-config",
+      "cacheVariables": {
+        "CMAKE_C_COMPILER": "cl",
+        "CMAKE_CXX_COMPILER": "cl"
+      }
+    },
+    {
+      "name": "linux-debug",
+      "inherits": "linux-config",
+      "description": "Debug configuration for Linux",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_CXX_FLAGS_DEBUG": "-g -O0 -Wall -Wextra -Werror"
+      }
+    },
+    {
+      "name": "linux-release",
+      "inherits": "linux-config",
+      "description": "Release configuration for Linux",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "CMAKE_CXX_FLAGS_RELEASE": "-O3 -DNDEBUG"
+      }
+    },
+    {
+      "name": "windows-debug",
+      "inherits": "windows-config",
+      "description": "Debug configuration for Windows",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_CXX_FLAGS_DEBUG": "/Zi /Od /W4 /Wx"
+      }
+    },
+    {
+      "name": "windows-release",
+      "inherits": "windows-config",
+      "description": "Release configuration for Windows",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "CMAKE_CXX_FLAGS_RELEASE": "/O3 /DNDEBUG"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "base-build",
+      "hidden": true,
+      "configurePreset": "base-config",
+      "jobs": 4
+    },
+    {
+      "name": "generate-documentation",
+      "inherits": "base-build",
+      "configurePreset": "base-config",
+      "targets": [
+        "doxygen-app1",
+        "doxygen-app2"
+      ]
+    },
+    {
+      "name": "linux-debug-build",
+      "inherits": "base-build",
+      "configurePreset": "linux-debug"
+    },
+    {
+      "name": "linux-release-build",
+      "inherits": "base-build",
+      "configurePreset": "linux-release"
+    },
+    {
+      "name": "windows-debug-build",
+      "inherits": "base-build",
+      "configurePreset": "windows-debug"
+    },
+    {
+      "name": "windows-release-build",
+      "inherits": "base-build",
+      "configurePreset": "windows-release"
+    }
+  ],
+  "testPresets": [
+    {
+      "name": "base-test",
+      "hidden": true,
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "linux-debug-test",
+      "inherits": "base-test",
+      "configurePreset": "linux-debug"
+    },
+    {
+      "name": "linux-release-test",
+      "inherits": "base-test",
+      "configurePreset": "linux-release",
+      "output": {
+        "shortProgress": true,
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "windows-debug-test",
+      "inherits": "base-test",
+      "configurePreset": "windows-debug"
+    },
+    {
+      "name": "windows-release-test",
+      "inherits": "base-test",
+      "configurePreset": "windows-release",
+      "output": {
+        "shortProgress": true,
+        "outputOnFailure": true
+      }
+    }
+  ],
+  "packagePresets": [
+    {
+      "name": "base-package",
+      "hidden": true,
+      "configurePreset": "base-config",
+      "generators": ["ZIP"],
+      "packageDirectory": "${sourceDir}/releases"
+    },
+    {
+      "name": "linux-debug-package",
+      "inherits": "base-package",
+      "configurePreset": "linux-debug"
+    },
+    {
+      "name": "linux-release-package",
+      "inherits": "base-package",
+      "configurePreset": "linux-release"
+    },
+    {
+      "name": "windows-debug-package",
+      "inherits": "base-package",
+      "configurePreset": "windows-debug"
+    },
+    {
+      "name": "windows-release-package",
+      "inherits": "base-package",
+      "configurePreset": "windows-release"
+    }
+  ],
+  "workflowPresets": [
+    {
+      "name": "linux-fast-debug-workflow",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "linux-debug"
+        },
+        {
+          "type": "build",
+          "name": "linux-debug-build"
+        },
+        {
+          "type": "package",
+          "name": "linux-debug-package"
+        }
+      ]
+    },
+    {
+      "name": "linux-debug-workflow",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "linux-debug"
+        },
+        {
+          "type": "build",
+          "name": "linux-debug-build"
+        },
+        {
+          "type": "test",
+          "name": "linux-debug-test"
+        },
+        {
+          "type": "package",
+          "name": "linux-debug-package"
+        }
+      ]
+    },
+    {
+      "name": "linux-release-workflow",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "linux-release"
+        },
+        {
+          "type": "build",
+          "name": "linux-release-build"
+        },
+        {
+          "type": "test",
+          "name": "linux-release-test"
+        },
+        {
+          "type": "package",
+          "name": "linux-release-package"
+        }
+      ]
+    }
+  ],
+  "vendor": {}
+}
